@@ -2,29 +2,28 @@ function drawAll() {
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   //draw background
-  context.drawImage(bg, 0, 0, canvas.width, canvas.height - groundHeight);
+  if(birdAlive){
 
-  pipes.update();
-  pipes.applyVel();
-  pipes.draw();
-  if(pipes.check(bird.x, bird.y, bird.height, bird.width)){
-    console.log("alive");
+    pipes.update();
+    pipes.applyVel();
+
+    ground.applyVel();
+    ground.checkBound();
+
+    bird.checkBound();
+    bird.applyAcc();
+    bird.applyVel();
+    bird.applyRotationChange();
+    birdAlive = pipes.check(bird.x, bird.y, bird.height, bird.width)
   }
   else {
-    console.log("dead");
+    // gameOver = Image();
+    // context.drawImage(bg, 0, 0, canvas.width, canvas.height - groundHeight);
   }
-
-  ground.applyVel();
-  ground.checkBound();
+  context.drawImage(bg, 0, 0, canvas.width, canvas.height - groundHeight);
+  pipes.draw();
   ground.draw();
-
-  bird.applyAcc();
-  bird.applyVel();
-  bird.applyRotationChange();
-  // console.log(bird.velocity);
-  bird.checkBound();
   bird.draw();
-
   window.requestAnimationFrame(drawAll);
 }
 
@@ -35,10 +34,10 @@ var canvas = document.getElementById("mainCanvas");
 var context = canvas.getContext("2d");
 
 // scale to flappy bird bg img size
-// canvas.width = (windowHeight - 20) * 480 / 640;
-// canvas.height = windowHeight - 20;
-canvas.width = 480;
-canvas.height = 640;
+canvas.width = (windowHeight - 20) * 480 / 640;
+canvas.height = windowHeight - 20;
+// canvas.width = 480;
+// canvas.height = 640;
 
 var bg = new Image();
 bg.src = "sprites/background-day.png";
@@ -52,6 +51,8 @@ var sizeFactor = 0.8;
 var bird = new Bird(canvas.width/2 - 50, (canvas.height - groundHeight)/2, groundHeight, sizeFactor=sizeFactor);
 
 // var pipe = new PipePair(birdXSpeed, groundHeight, 70, canvas.width);
-var pipes = new Pipes(5, birdXSpeed, groundHeight, 300);
+var pipes = new Pipes(3, birdXSpeed, groundHeight, 100);
+
+birdAlive = true;
 document.addEventListener("keydown", flap);
 window.requestAnimationFrame(drawAll);

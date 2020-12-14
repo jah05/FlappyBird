@@ -87,32 +87,16 @@ class PipePair {
   }
 
   hit(birdX, birdY, birdHeight, birdWidth) {
-    // if((birdY < this.y1 + 378 * this.pipeScale) || (birdY+birdHeight > this.y2 - 378 * this.pipeScale)) {
-    //   if(this.x < birdX && birdX+birdWidth < this.x + 52 * this.pipeScale) {
-    //     return true;
-    //   }
-    // }
-
-    if(birdX + birdWidth > this.x && birdX < this.x + this.x + 52 * this.pipeScale) {
-      if(birdY-birdHeight < this.y1 + 378 * this.pipeScale) {
+    if(birdX + birdWidth/2 > this.x && birdX - birdWidth/2 < this.x + 52 * this.pipeScale) {
+      if(birdY-birdHeight/2 < this.y1 + 378 * this.pipeScale) { // if it is within pipe1
         return true;
       }
-      else if(birdY + birdHeight > this.y2 - 378 * this.pipeScale) {
+      else if(birdY + birdHeight/2 > this.y2) { // if it is within pipe2;
         return true;
       }
     }
 
     return false;
-  }
-
-  overlap(x1, y1, x2, y2, rx1, ry1, rx2, ry2) {
-    if(x2 < rx1 || x1 > rx2) { // if to the left or right return false
-      return false;
-    }
-    else if(y2 < ry1 || y1 > ry2) { // if to the top or bottom return false
-      return false;
-    }
-    return true;
   }
 }
 
@@ -238,7 +222,7 @@ class Bird {
       context.save();
       context.translate(this.x, this.y);
       context.rotate(this.angle);
-      context.drawImage(this.img, 0-this.img.width * this.sizeFactor/2., 0-this.img.height * this.sizeFactor/2, this.img.width * this.sizeFactor, this.img.height * this.sizeFactor);
+      context.drawImage(this.img, 0-this.img.width * this.sizeFactor/2, 0-this.img.height * this.sizeFactor/2, this.img.width * this.sizeFactor, this.img.height * this.sizeFactor);
       // context.beginPath();
       // context.rect(-this.img.width * this.sizeFactor/2, -this.img.height * this.sizeFactor/2,
       // -this.img.width * this.sizeFactor/2 + this.img.width * this.sizeFactor, this.img.height * this.sizeFactor + this.img.height * this.sizeFactor);
