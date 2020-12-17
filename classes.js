@@ -6,13 +6,17 @@ class Pipes {
     this.gap = gap;
     this.pipes = [];
     this.pipeScale = pipeScale;
+    // find interval length between pipes
     this.interval = (canvas.width - (this.pipeScale * 52) * numPipes) / (numPipes-1);
     this.initializePipes();
+    //variable to keep track of the next pipe
+    this.birdPipePos = 0; // pos0 || pos1 || pos2 ...
   }
 
   initializePipes() {
     var nextX = canvas.width;
     for(var i=0; i<this.numPipes; i++) {
+      // create the array of pipes;
       this.pipes.push(new PipePair(this.velocity, this.groundHeight, this.gap, nextX));
       nextX += this.interval + 52 * this.pipeScale;
     }
@@ -28,8 +32,11 @@ class Pipes {
     // remove out of frame pipes and adds one in the back;
     if(this.pipes.length > 0) {
       if(!this.pipes[0].inFrame()) {
-        this.pipes.shift();
-        this.pipes.push(new PipePair(this.velocity, this.groundHeight, this.gap, this.pipes[this.pipes.length - 1].x + this.interval + 52 * this.pipeScale));
+        this.pipes.shift(); //remove the first element because it is out of screen
+        this.birdPipePos -= 1; // if the a pipe moves out move back ordinal position
+        // add the new pipe in the back
+        this.pipes.push(new PipePair(this.velocity, this.groundHeight, this.gap,
+          this.pipes[this.pipes.length - 1].x + this.interval + 52 * this.pipeScale));
       }
     }
   }
@@ -43,11 +50,19 @@ class Pipes {
   check(birdX, birdY, birdHeight, birdWidth) {
     var birdAlive = true;
     for(var i=0; i<this.pipes.length && birdAlive; i++) {
+      // if a pipe makes contact with the bird return true;
       if(this.pipes[i].hit(birdX, birdY, birdHeight, birdWidth)) {
         birdAlive = false;
       }
     }
     return birdAlive;
+  }
+
+  passed(birdX, birdWidth) {
+    if(this.pipes[this.birdPipePos].x + this.pipes[this.birdPipePos].pipeScale * 52 < birdX - birdWidth/2) {
+      this.birdPipePos += 1; // if when bird passes pipe add to ordinal position
+      return true;
+    }
   }
 }
 
@@ -60,13 +75,13 @@ class PipePair {
     this.pipe1.src = "sprites/pipeNorth.png";
     this.pipe2.src = "sprites/pipeSouth.png";
 
-    var tHeight = canvas.height - groundHeight - gap;
-    var pipe1Height = Math.random() * tHeight;
-    var pipe2Height = tHeight - pipe1Height;
+    var tHeight = canvas.height - groundHeight - gap; // find available space
+    var pipe1Height = Math.random() * tHeight; // random height
+    var pipe2Height = tHeight - pipe1Height; // find remaining height
 
     this.pipeScale = 0.6;
 
-    this.y1 = -(378 * this.pipeScale - pipe1Height); // -(378 - pipe1Height)
+    this.y1 = -(378 * this.pipeScale - pipe1Height); // find offset y pos
     this.y2 = (canvas.height - groundHeight) + (378 * this.pipeScale - pipe2Height) - 377 * this.pipeScale;
   }
 
@@ -75,6 +90,7 @@ class PipePair {
   }
 
   inFrame() {
+    // checks if the pipe is in frame
     if(this.x + this.pipeScale * 52 <= 0) {
       return false;
     }
@@ -100,22 +116,12 @@ class PipePair {
   }
 }
 
-class Score {
-  constructor() {
-    this.score = 0;
-  }
-
-  draw() {
-    var display = this.score.toString();
-
-  }
-}
-
 class Ground{
   constructor(velocity, width, height,) {
     this.velocity = velocity;
     this.width = width;
     this.height = height;
+    // two grounds so we can rotate when one moves out of frame
     this.pos1 = [0, canvas.height - this.height]; //ground 1
     this.pos2 = [canvas.width-10, canvas.height - this.height]; //ground 2
     this.img1 = new Image();
@@ -136,7 +142,7 @@ class Ground{
 
   checkBound() {
     if(this.pos1[0] + this.width - 10 <= 0) {
-      // rotate
+      // switch ground2 to ground1
       this.pos1 = this.pos2;
       this.pos2 = [canvas.width-10, canvas.height - this.height];
     }
@@ -166,22 +172,22 @@ class Bird {
 
   applyVel() {
     this.y += this.velocity;
-    // console.log("a");
-    // console.log(this.y);
   }
 
   applyAcc() {
     this.velocity += this.gravity;
-    // console.log("b");
   }
 
   applyRotationChange () {
+    // if bird is falling rotate
     if(this.velocity > 0 && this.angle < Math.PI / 2) {
       this.angle += this.angAcc;
     }
+    // if rotation is too much stop it;
     else if(this.velocity > 0 && this.angle < Math.PI / 2) {
       this.angle = Math.PI/2
     }
+    // when flap the bird is upright
     else {
       this.angle = 0;
     }
@@ -191,15 +197,12 @@ class Bird {
     if(this.y + this.img.height - 13>= canvas.height - groundHeight) {
       this.velocity = 0;
       this.gravity = 0;
-      // console.log("a");
     }
     else if(this.y - this.img.height/2 <= 0) {
       this.velocity = 0;
-      // console.log("b");
     }
     else {
       this.gravity = 0.4;
-      // console.log("c");
     }
   }
 
@@ -207,14 +210,13 @@ class Bird {
     var key = event.keyCode;
     if((key == '87') || (key == '38')){
       this.img.src = "sprites/yellowbird-upflap.png";
-      this.velocity = -6;
+      this.velocity = -6; // boost upwards
 
       // flap motion
-      await new Promise(r => setTimeout(r, 250));
+      await new Promise(r => setTimeout(r, 250)); // wait
       this.img.src = "sprites/yellowbird-downflap.png";
-      await new Promise(r => setTimeout(r, 250));
+      await new Promise(r => setTimeout(r, 250)); // wait
       this.img.src = "sprites/yellowbird-midflap.png";
-      // console.log(this.y);
     }
   }
 
@@ -222,16 +224,10 @@ class Bird {
       context.save();
       context.translate(this.x, this.y);
       context.rotate(this.angle);
-      context.drawImage(this.img, 0-this.img.width * this.sizeFactor/2, 0-this.img.height * this.sizeFactor/2, this.img.width * this.sizeFactor, this.img.height * this.sizeFactor);
-      // context.beginPath();
-      // context.rect(-this.img.width * this.sizeFactor/2, -this.img.height * this.sizeFactor/2,
-      // -this.img.width * this.sizeFactor/2 + this.img.width * this.sizeFactor, this.img.height * this.sizeFactor + this.img.height * this.sizeFactor);
-      // context.stroke();
+      context.drawImage(this.img, 0-this.img.width * this.sizeFactor/2,
+        0-this.img.height * this.sizeFactor/2, this.img.width * this.sizeFactor,
+        this.img.height * this.sizeFactor);
       context.restore();
-      // context.beginPath();
-      // context.arc(this.x,this.y,5,0,2*Math.PI);
-      // context.fillStyle = 'blue';
-      // context.fill();
   }
 }
 
