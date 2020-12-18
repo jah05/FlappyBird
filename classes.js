@@ -14,6 +14,11 @@ class Pipes {
   }
 
   initializePipes() {
+  /*
+    Purpose: Creates the initial set of pipes
+    Inputs: None
+    Returns: None
+  */
     var nextX = canvas.width;
     for(var i=0; i<this.numPipes; i++) {
       // create the array of pipes;
@@ -23,12 +28,22 @@ class Pipes {
   }
 
   applyVel() {
+  /*
+    Purpose: Applies the velocity to the position of the pipes
+    Inputs: None
+    Returns: None
+  */
     for(var i=0; i<this.pipes.length; i++) {
       this.pipes[i].applyVel();
     }
   }
 
   update() {
+  /*
+    Purpose: Checks for out of bound pipes
+    Inputs: None
+    Returns: None
+  */
     // remove out of frame pipes and adds one in the back;
     if(this.pipes.length > 0) {
       if(!this.pipes[0].inFrame()) {
@@ -42,12 +57,22 @@ class Pipes {
   }
 
   draw() {
+  /*
+    Purpose: Draws all the pipes
+    Inputs: None
+    Returns: None
+  */
     for(var i=0; i<this.pipes.length; i++) {
       this.pipes[i].draw();
     }
   }
 
   check(birdX, birdY, birdHeight, birdWidth) {
+  /*
+    Purpose: Checks if bird hits any of the pipes
+    Inputs: x and y position of the bird and size of the bird.
+    Returns: Whether the bird has hit the pipes or not.
+  */
     var birdAlive = true;
     for(var i=0; i<this.pipes.length && birdAlive; i++) {
       // if a pipe makes contact with the bird return true;
@@ -59,6 +84,11 @@ class Pipes {
   }
 
   passed(birdX, birdWidth) {
+  /*
+    Purpose: Checks if the bird has passed a pipe.
+    Inputs: The x position and with of the bird.
+    Returns: Whether the bird has passed any pipes.
+  */
     if(this.pipes[this.birdPipePos].x + this.pipes[this.birdPipePos].pipeScale * 52 < birdX - birdWidth/2) {
       this.birdPipePos += 1; // if when bird passes pipe add to ordinal position
       return true;
@@ -86,10 +116,20 @@ class PipePair {
   }
 
   applyVel() {
+  /*
+    Purpose: Applies velocity to the pipe
+    Inputs: None
+    Returns: None
+  */
     this.x -= this.velocity;
   }
 
   inFrame() {
+  /*
+    Purpose: Checks for out of bound pipes
+    Inputs: None
+    Returns: Whether the pipe is in the frame
+  */
     // checks if the pipe is in frame
     if(this.x + this.pipeScale * 52 <= 0) {
       return false;
@@ -98,11 +138,21 @@ class PipePair {
   }
 
   draw() {
+  /*
+    Purpose: Draw the pipes
+    Inputs: None
+    Returns: None
+  */
     context.drawImage(this.pipe1, this.x, this.y1, this.pipe1.width * this.pipeScale, this.pipe1.height * this.pipeScale);
     context.drawImage(this.pipe2, this.x, this.y2, this.pipe2.width * this.pipeScale, this.pipe2.height * this.pipeScale);
   }
 
   hit(birdX, birdY, birdHeight, birdWidth) {
+  /*
+    Purpose: Checks if the bird hits the pipe.
+    Inputs: Position and size of the bird.
+    Returns: Whether the bird hits the pipes.
+  */
     if(birdX + birdWidth/2 > this.x && birdX - birdWidth/2 < this.x + 52 * this.pipeScale) {
       if(birdY-birdHeight/2 < this.y1 + 378 * this.pipeScale) { // if it is within pipe1
         return true;
@@ -131,16 +181,31 @@ class Ground{
   }
 
   initialize() {
+  /*
+    Purpose: Initialize the position of the pipes
+    Inputs: None
+    Returns: None
+  */
     this.pos1 = [0, canvas.height - this.height]; //ground 1
     this.pos2 = [canvas.width-10, canvas.height - this.height];
   }
 
   applyVel() {
+  /*
+    Purpose: Applies the velocity to the grounds.
+    Inputs: None
+    Returns: None
+  */
     this.pos1[0] -= this.velocity;
     this.pos2[0] -= this.velocity;
   }
 
   checkBound() {
+  /*
+    Purpose: Checks if the ground is in frame and if yes, adjust for more ground.
+    Inputs: None
+    Returns: None
+  */
     if(this.pos1[0] + this.width - 10 <= 0) {
       // switch ground2 to ground1
       this.pos1 = this.pos2;
@@ -149,6 +214,11 @@ class Ground{
   }
 
   draw() {
+  /*
+    Purpose: Draws the ground.
+    Inputs: None
+    Returns: None
+  */
     context.drawImage(this.img1, this.pos1[0], this.pos1[1], this.width, this.height);
     context.drawImage(this.img2, this.pos2[0], this.pos2[1], this.width, this.height);
   }
@@ -171,14 +241,29 @@ class Bird {
   }
 
   applyVel() {
+  /*
+    Purpose: Applies the velocity to the bird.
+    Inputs: None
+    Returns: None
+  */
     this.y += this.velocity;
   }
 
   applyAcc() {
+  /*
+    Purpose: Applies the acceleration to the velocity.
+    Inputs: None
+    Returns: None
+  */
     this.velocity += this.gravity;
   }
 
   applyRotationChange () {
+  /*
+    Purpose: Applies rotation to the bird.
+    Inputs: None
+    Returns: None
+  */
     // if bird is falling rotate
     if(this.velocity > 0 && this.angle < Math.PI / 2) {
       this.angle += this.angAcc;
@@ -194,6 +279,11 @@ class Bird {
   }
 
   checkBound() {
+  /*
+    Purpose: Checks if the bird is on the ground or under the roof, if not stop the bird.
+    Inputs: None
+    Returns: None
+  */
     if(this.y + this.img.height - 13>= canvas.height - groundHeight) {
       this.velocity = 0;
       this.gravity = 0;
@@ -207,6 +297,11 @@ class Bird {
   }
 
   async flap(event) {
+  /*
+    Purpose: Does the flap action on the bird.
+    Inputs: The key pressed.
+    Returns: None
+  */
     var key = event.keyCode;
     if((key == '87') || (key == '38')){
       this.img.src = "sprites/yellowbird-upflap.png";
@@ -221,16 +316,26 @@ class Bird {
   }
 
   draw() {
-      context.save();
-      context.translate(this.x, this.y);
-      context.rotate(this.angle);
-      context.drawImage(this.img, 0-this.img.width * this.sizeFactor/2,
-        0-this.img.height * this.sizeFactor/2, this.img.width * this.sizeFactor,
-        this.img.height * this.sizeFactor);
-      context.restore();
+  /*
+    Purpose:Draws the bird with rotation.
+    Inputs: None
+    Returns: None
+  */
+    context.save();
+    context.translate(this.x, this.y);
+    context.rotate(this.angle);
+    context.drawImage(this.img, 0-this.img.width * this.sizeFactor/2,
+      0-this.img.height * this.sizeFactor/2, this.img.width * this.sizeFactor,
+      this.img.height * this.sizeFactor);
+    context.restore();
   }
 }
 
 function flap(event) {
+  /*
+    Purpose: Helper function to call the flap action.
+    Inputs: None
+    Returns: None
+  */
   bird.flap(event);
 }

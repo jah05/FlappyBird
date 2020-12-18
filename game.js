@@ -1,4 +1,9 @@
 function playAgain(event) {
+  /*
+    Purpose: This is a function called when one wants to reset the game
+    Inputs: Key typed, a string.
+    Returns: None
+  */
   var key = event.key;
   if(!birdAlive) {
     if(key=="r") {
@@ -8,14 +13,26 @@ function playAgain(event) {
 }
 
 function resetGame() {
+  /*
+  Purpose: Resets game to original state, including score
+  Inputs: None
+  Returns: None
+  */
+  // reset to original state
   bird = new Bird(canvas.width/2 - 50, (canvas.height - groundHeight)/2, groundHeight, sizeFactor=sizeFactor);
   pipes = new Pipes(3, birdXSpeed, groundHeight, 100);
   ground = new Ground(birdXSpeed, canvas.width, groundHeight);
-  score = 0;
-  birdAlive = true;
+  score = 0; // reset score
+  birdAlive = true; // revive
 }
 
 function drawScore() {
+  /*
+  Purpose: Draws the score on the screen
+  Inputs: None
+  Returns: None
+  */
+  // split to digits so we are able to use the textured digits
   var scoreDigits = (score.toString()).split('');
   var imageW = 24;
   var imageH = 36;
@@ -23,18 +40,23 @@ function drawScore() {
   var x = 10;
   var digitFactor = 0.5;
   for(var i=0; i<scoreDigits.length; i++) {
+    // build string for path
     var path = "sprites/" + scoreDigits[i] + ".png";
     var digit = new Image();
     digit.src = path;
     context.drawImage(digit, x, y, imageW * digitFactor, imageH * digitFactor);
-    x += imageW * digitFactor + 2;
+    x += imageW * digitFactor + 2; // move to next image position
   }
 }
 
 function drawAll() {
+  /*
+  Purpose: This is the main drawing loop.
+  Inputs: None, but it is affected by what the other functions are doing
+  Returns: None, but it calls itself to cycle to the next frame
+  */
   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  //draw background
   if(birdAlive){
     pipes.update();
     pipes.applyVel();
@@ -46,12 +68,12 @@ function drawAll() {
     bird.applyVel();
     bird.applyRotationChange();
     bird.checkBound();
-    if(pipes.passed(bird.x, bird.width)) {
+    if(pipes.passed(bird.x, bird.width)) { // if bird passes a pipe add to score
       score++;
     }
-    console.log(score);
     birdAlive = pipes.check(bird.x, bird.y, bird.height, bird.width)
   }
+  // draw everything
   context.drawImage(bg, 0, 0, canvas.width, canvas.height - groundHeight);
   pipes.draw();
   ground.draw();
@@ -79,7 +101,7 @@ canvas.height = windowHeight - 20;
 
 var birdXSpeed = 1.5;
 var sizeFactor = 0.8;
-var groundHeight = canvas.width * 112 / 336;
+var groundHeight = canvas.width * 112 / 336; // scale to canvas
 var score = 0;
 var birdAlive = true;
 
